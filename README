@@ -1,0 +1,22 @@
+O solver utilizado foi o OR-TOOLS na linguagem python3
+
+Para executar o código basta executar:
+
+python3 trab2.py
+
+O codigo vai esperar como entrada na primeira linha um valor n(numero de galaxias) e em seguida é esperada uma matriz de distancias de tamanho nxn com as respectivas distancias da galaxia i para j, com as linhas separadas por quebra de linha os elementos da linha separados por espaço, ex:
+
+5
+0 215 390 655 915
+215 0 183 467 717
+390 183 0 315 592
+655 467 315 0 627
+915 717 592 627 0
+
+Essa matriz pode ser escrita em um arquivo e redirecionada para o programa da seguinte forma no terminal:
+
+python3 trab2.py < arquivoTeste
+
+Para executar o nosso toyproblem basta redirecionar o arquivo enviado junto com o codigo chamado 'toyproblem', ou seja, basta executar a seguinte linha:
+
+python3 trab2.py < toyproblem
