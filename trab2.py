@@ -44,9 +44,10 @@ else:
         points.append(point)
 
 
-for i in range(n):
-    plt.plot(points[i][0],points[i][1],'ro-')
-plt.show()
+#for i in range(n):
+#    plt.plot(points[i][0],points[i][1],'ro-')
+#plt.show()
+
 #-----------------------------------Nao le mais matriz de dist, ja que le pontos...
 #le matriz de distancia
 #mat = []
