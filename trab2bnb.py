@@ -160,14 +160,14 @@ objective.SetMinimization() #coloca para minimizar a func obj
 
 def respostaInteira(x):
 	for i in range(n*n):
-		if(x[i].solution_value() > 0.00000000001 and x[i].solution_value() < 0.9999999999):
+		if(x[i].solution_value() > 0.0001 and x[i].solution_value() < 0.999):
 		#if(int(x[i].solution_value()) != math.ceil(x[i].solution_value())):
 			#print("fim igual")
 			return i
 	#print("fim -1")
 	return -1
 
-
+'''
 def printRes(x):
 	for j in range(n*n):
 		indFrom = (int)(j/n)
@@ -178,6 +178,7 @@ def printRes(x):
 		#print('U ', str(j+1),' = ', u[j].solution_value())
 		#print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[j].solution_value())
 	plt.show()
+'''
 
 def printRes2(res):
 	for j in range(n*n):
@@ -185,7 +186,7 @@ def printRes2(res):
 		indTo = j%n
 		if(res[j] >= 0.999999):
 			plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
-		print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', res[j])
+		#print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', res[j])
 	plt.show()
 
 primal = infinity
@@ -204,24 +205,25 @@ def bnb(solver):
 	#global u
 
 	global primal
+	global tempoExc
 	#global dual
 
 	#global count
 	#my_id = count
 	#count += 1
 
-	#stop = timeit.default_timer()
+	stop = timeit.default_timer()
 
-	#if(stop - start >= 20):
-	#	tempoExc = 1
-	#	return
+	if(stop - start >= 10*60):
+		tempoExc = 1
+		return
 
 	status = solver.Solve()
 	if status == pywraplp.Solver.OPTIMAL:
 		objval = solver.Objective().Value()
 		#print(objval)
 		if(objval >= primal):
-			print("poda por qualidade: " + str(objval))
+			#print("poda por qualidade: " + str(objval))
 			#dot.node(f"{my_id}", f"Poda por qualidade", color="blue")
 			#count += 1
 			return # my_id
@@ -244,16 +246,60 @@ def bnb(solver):
 				#dot.edge(f"{my_id}", f"{child_id}", label=f"x{int(idx/n)},{idx%n} = 1")
 
 				x[idx].SetBounds(0,1) #volta ao normal
-	else:
-		print("Poda por infactibilidade")
+	#else:
+		#print("Poda por infactibilidade")
 		#dot.node(f"{my_id}", f"Poda por infactibilidade", color="red")
 		#count += 1
 	return #my_id
+
+
+def heuristica():
+	global primal
+	global res
+	resposta = 0
+	respostaVet = [0] * (n*n)
+	visitados = [0] * n
+	numVisitados = 1
+
+	i = 0
+	visitados[0] = 1
+	while (True):
+		minValue = 0x7fffffff
+		idx = -1
+		for j in range(n):
+			if( (visitados[j] == 0) and (i != j) ):
+				if(mat[i][j] < minValue):
+					minValue = mat[i][j]
+					idx = j
+
+		#print(idx)
+		respostaVet[i*n + idx] = 1
+		visitados[idx] = 1
+		numVisitados += 1
+		resposta += mat[i][idx]
+		i = idx
+		if(numVisitados == n):
+			respostaVet[i*n + 0] = 1
+			resposta += mat[i][0]
+			break
+
+	primal = resposta
+	res = respostaVet
+
+
+
+
+
+heuristica()
+
+print(primal)
+printRes2(res)
 
 bnb(solver)
 
 if(tempoExc):
 	print("Tempo Excedido, Resposta encontrada:")
+
 print(primal)
 printRes2(res)
 
