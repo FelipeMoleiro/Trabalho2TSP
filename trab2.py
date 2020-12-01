@@ -169,6 +169,7 @@ for j in range(n-1):
 
 objective.SetMinimization() #coloca para minimizar a func obj
 
+
 status = solver.Solve() # resolve
 
 if status == pywraplp.Solver.OPTIMAL: #se achou resposta
@@ -187,4 +188,5 @@ if status == pywraplp.Solver.OPTIMAL: #se achou resposta
         print('U ', str(j+1),' = ', u[j].solution_value())
     plt.show()
 else: #se nao tem resposta
+    print(solver.nodes())
     print('The problem does not have an optimal solution.')
