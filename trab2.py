@@ -80,14 +80,14 @@ for i in range(n):
 #numero de variaveis é n*n de xij + (n-1) informando a ordem de visitação dos nós 2 a n 
 data['num_vars'] = n * n + n-1
 
-x = {}
-u = {}
+x = []
+u = []
 for j in range(n*n):
-    x[j] = solver.BoolVar('x[%i]' % j)
+    x.append( solver.BoolVar('x[%i]' % j) )
 
 
 for j in range(n-1):
-    u[j] = solver.IntVar(1.0,n-1, 'u[%i]' % j)
+    u.append( solver.IntVar(1.0,n-1, 'u[%i]' % j) )
 
 
 #garante que todas as variaveis Xij, com i fixo e j variando, somadas sejam igual a 1
@@ -171,7 +171,46 @@ for j in range(n-1):
 
 objective.SetMinimization() #coloca para minimizar a func obj
 
-solver.SetTimeLimit(30*1000)
+
+
+def heuristica():
+    global primal
+    global res
+    resposta = 0
+    respostaVet = [0] * (n*n)
+    visitados = [0] * n
+    numVisitados = 1
+
+    i = 0
+    visitados[0] = 1
+    while (True):
+        minValue = 0x7fffffff
+        idx = -1
+        for j in range(n):
+            if( (visitados[j] == 0) and (i != j) ):
+                if(mat[i][j] < minValue):
+                    minValue = mat[i][j]
+                    idx = j
+
+        #print(idx)
+        respostaVet[i*n + idx] = 1
+        visitados[idx] = 1
+        numVisitados += 1
+        resposta += mat[i][idx]
+        i = idx
+        if(numVisitados == n):
+            respostaVet[i*n + 0] = 1
+            resposta += mat[i][0]
+            break
+
+    return resposta, respostaVet
+
+#primal, res = heuristica()
+#solver.SetHint(x,res)
+
+tempoEmSegundos = 10# * 60
+
+solver.SetTimeLimit(tempoEmSegundos*1000)
 
 status = solver.Solve() # resolve
 

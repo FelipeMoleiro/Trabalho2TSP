@@ -95,9 +95,6 @@ y = {}
 for j in range(n*n):
     x[j] = solver.NumVar(0,1,'x[%i]' % j)
 
-for j in range(n*n):
-    y[j] = solver.NumVar(x[j],x[j],'y[%i]' % j)
-
 for j in range(n-1):
     u[j] = solver.NumVar(1,n-1, 'u[%i]' % j)
 
@@ -160,7 +157,7 @@ for j in range(n-1):
     objective.SetCoefficient(u[j], 0) #coloca coeficientes da func objetivo
 objective.SetMinimization() #coloca para minimizar a func obj
 
-'''
+
 def respostaInteira(x):
 	for i in range(n*n):
 		if(x[i].solution_value() > 0.00000000001 and x[i].solution_value() < 0.9999999999):
@@ -264,24 +261,3 @@ printRes2(res)
 #status = solver.Solve()# resolve
 #print(respostaInteira(x))
 
-'''
-
-status = solver.Solve() # resolve
-
-if status == pywraplp.Solver.OPTIMAL: #se achou resposta
-    print('Objective value =', solver.Objective().Value()) #print valor da função objetivo minimizada
-
-    #para cada variavel
-    for j in range(n*n):
-        indFrom = (int)(j/n)
-        indTo = j%n
-
-        if(x[j].solution_value()):
-            plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
-
-        print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[j].solution_value())
-    for j in range(n-1):
-        print('U ', str(j+1),' = ', u[j].solution_value())
-    plt.show()
-else: #se nao tem resposta
-    print('The problem does not have an optimal solution.')

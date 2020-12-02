@@ -254,8 +254,6 @@ def bnb(solver):
 
 
 def heuristica():
-	global primal
-	global res
 	resposta = 0
 	respostaVet = [0] * (n*n)
 	visitados = [0] * n
@@ -283,14 +281,13 @@ def heuristica():
 			resposta += mat[i][0]
 			break
 
-	primal = resposta
-	res = respostaVet
+	return resposta, respostaVet
 
 
 
 
 
-heuristica()
+primal, res = heuristica()
 
 print(primal)
 printRes2(res)
