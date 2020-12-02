@@ -133,15 +133,14 @@ for j in range(n-1):
 objective.SetMinimization() #coloca para minimizar a func obj
 
 
-
 def heuristica():
-    global primal
-    global res
     resposta = 0
     respostaVet = [0] * (n*n)
+    respostaU = [0] * (n-1)
     visitados = [0] * n
     numVisitados = 1
 
+    cnt = 0
     i = 0
     visitados[0] = 1
     while (True):
@@ -154,6 +153,8 @@ def heuristica():
                     idx = j
 
         #print(idx)
+        cnt += 1
+        respostaU[idx-1] = cnt
         respostaVet[i*n + idx] = 1
         visitados[idx] = 1
         numVisitados += 1
@@ -164,14 +165,18 @@ def heuristica():
             resposta += mat[i][0]
             break
 
-    return resposta, respostaVet
+    return resposta, respostaVet, respostaU
 
-primal, res = heuristica()
-solver.SetHint(x,res)
+primal, resX, resU = heuristica()
 
-tempoEmSegundos = 10 * 60
+#primal, res = heuristica()
+#solver.SetHint(x,res)
+
+tempoEmSegundos = 30 #10 * 60
 
 solver.set_time_limit(tempoEmSegundos*1000)
+
+#solver.SCIP_LPPAR_TIMING
 
 status = solver.Solve() # resolve
 
