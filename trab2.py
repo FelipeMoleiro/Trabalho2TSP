@@ -112,7 +112,7 @@ for k in range(n): #k é numero de restriçoes
 for i in range(1,n):
     for j in range(1,n):
         constraint = solver.RowConstraint(-infinity,n-2, '')
-
+        constraint.set_is_lazy(True)
         constraint.SetCoefficient(x[i*n + j],(n-1))
 
         if(i != j):
@@ -168,11 +168,17 @@ def heuristica():
     return resposta, respostaVet, respostaU
 
 primal, resX, resU = heuristica()
-
+temp1 = []
+temp2 = []
+for i in range(n*n):
+    temp1.append( resX[i] )
+    temp2.append(x[i])
+for i in range(n-1):
+    temp1.append( resU[i] )
+    temp2.append(u[i])
 #primal, res = heuristica()
-#solver.SetHint(x,res)
-
-tempoEmSegundos = 30 #10 * 60
+solver.SetHint(temp2,temp1)
+tempoEmSegundos = 10 * 60
 
 solver.set_time_limit(tempoEmSegundos*1000)
 

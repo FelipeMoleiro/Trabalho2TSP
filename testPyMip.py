@@ -108,8 +108,13 @@ def heuristica():
     return resposta, respostaVet, respostaU
 
 primal, resX, resU = heuristica()
-model.start = [(x[i], resX[i]) for i in range(n)]
-model.start = [(u[i], resU[i]) for i in range(n-1)]
+temp = []
+for i in range(n*n):
+	temp.append( (x[i], resX[i]) )
+for i in range(n-1):
+	temp.append( (u[i], resU[i]) )
+
+m.start = temp
 #solver.SetHint(x,res)
 
 print(primal)
