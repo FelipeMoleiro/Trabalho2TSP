@@ -21,6 +21,8 @@ def dist(x1,y1,x2,y2):
 solver = pywraplp.Solver.CreateSolver('SCIP')
 infinity = solver.infinity()
 
+solver.EnableOutput()
+
 #le numero de galaxias
 n = int(input())
 
@@ -169,24 +171,18 @@ for j in range(n-1):
 
 objective.SetMinimization() #coloca para minimizar a func obj
 
+solver.SetTimeLimit(30*1000)
 
 status = solver.Solve() # resolve
 
-if status == pywraplp.Solver.OPTIMAL: #se achou resposta
-    print('Objective value =', solver.Objective().Value()) #print valor da função objetivo minimizada
 
+ 
+
+if status == pywraplp.Solver.FEASIBLE: #se achou resposta
     #para cada variavel
     for j in range(n*n):
         indFrom = (int)(j/n)
         indTo = j%n
-
         if(x[j].solution_value()):
             plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
-
-        print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[j].solution_value())
-    for j in range(n-1):
-        print('U ', str(j+1),' = ', u[j].solution_value())
     plt.show()
-else: #se nao tem resposta
-    print(solver.nodes())
-    print('The problem does not have an optimal solution.')
