@@ -15,6 +15,8 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+DEBUG = 1
+
 def dist(x1,y1,x2,y2):
     return math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) )
 
@@ -80,6 +82,8 @@ for i in range(n):
 #numero de variaveis é n*n de xij + (n-1) informando a ordem de visitação dos nós 2 a n 
 data['num_vars'] = n * n + n-1
 
+if(DEBUG): print("Setting up variables")
+
 x = []
 u = []
 for j in range(n*n):
@@ -89,74 +93,31 @@ for j in range(n*n):
 for j in range(n-1):
     u.append( solver.IntVar(1.0,n-1, 'u[%i]' % j) )
 
+if(DEBUG): print("Setting up constraints")
+
+
 
 #garante que todas as variaveis Xij, com i fixo e j variando, somadas sejam igual a 1
 for k in range(n): #k é numero de restriçoes
-    res = [0] * (n*n)
-    for i in range(n):
-        res[k*n + i] = 1
-
     constraint = solver.RowConstraint(1, 1, '')
-    for j in range(n*n):
-        constraint.SetCoefficient(x[j], res[j])
-    for j in range(n-1):
-        constraint.SetCoefficient(u[j], 0)
+    for i in range(n):
+        constraint.SetCoefficient(x[k*n + i], 1)
 
 #garante que todas as variaveis Xij, com j fixo e i variando, somadas sejam igual a 1
 for k in range(n): #k é numero de restriçoes
-    res = [0] * (n*n)
-    for i in range(n):
-    	res[i*n + k] = 1
-
     constraint = solver.RowConstraint(1, 1, '')
-    for j in range(n*n):
-        constraint.SetCoefficient(x[j], res[j])
-    for j in range(n-1):
-        constraint.SetCoefficient(u[j], 0)
-
-
-''' Implementação Naive
-#para cada subconjuntos de tamanho 2 a n-1
-for tam in range(2,n):
-    combinationsR = combinations(list(range(n)), tam)
-    for comb in combinationsR:
-        #coloca a restrição somatorio de Xij, com i e j pertencente ao subconj e i!=j, tem que ser <= |subconjunto|-1
-        #print(comb)
-        res = [0] * data['num_vars']
-        for i in comb:
-            for j in comb:
-            	res[i*n + j] = 1
-
-        constraint = solver.RowConstraint(0,len(comb)-1, '')
-        for j in range(data['num_vars']):
-            constraint.SetCoefficient(x[j], res[j])
-'''
+    for i in range(n):
+        constraint.SetCoefficient(x[i*n + k], 1)
 
 for i in range(1,n):
     for j in range(1,n):
-        resX = [0] * (n*n)
-        resU = [0] * (n-1)
-        resX[i*n + j] = (n-1)
-
-        resU[i-1] += 1
-        resU[j-1] -= 1
-
         constraint = solver.RowConstraint(-infinity,n-2, '')
-        for j in range(n*n):
-            constraint.SetCoefficient(x[j], resX[j])
-        for j in range(n-1):
-            constraint.SetCoefficient(u[j], resU[j])
-'''
-for i in range(n):
-    resX = [0] * (n*n)
-    resX[i*n + i] = 1
 
-    constraint = solver.RowConstraint(0,0, '')
-    for j in range(n*n):
-        constraint.SetCoefficient(x[j], resX[j])
-    for j in range(n-1):
-        constraint.SetCoefficient(u[j], 0)
-'''
+        constraint.SetCoefficient(x[i*n + j],(n-1))
+
+        if(i != j):
+            constraint.SetCoefficient(u[i-1], 1)
+            constraint.SetCoefficient(u[j-1], -1)
 
 
 print('Number of variables =', solver.NumVariables())
@@ -205,12 +166,12 @@ def heuristica():
 
     return resposta, respostaVet
 
-#primal, res = heuristica()
-#solver.SetHint(x,res)
+primal, res = heuristica()
+solver.SetHint(x,res)
 
-tempoEmSegundos = 10# * 60
+tempoEmSegundos = 10 * 60
 
-solver.SetTimeLimit(tempoEmSegundos*1000)
+solver.set_time_limit(tempoEmSegundos*1000)
 
 status = solver.Solve() # resolve
 
