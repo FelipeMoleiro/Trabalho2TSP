@@ -20,7 +20,8 @@ DEBUG = 1
 def dist(x1,y1,x2,y2):
     return math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) )
 
-solver = pywraplp.Solver.CreateSolver('SCIP')
+#solver = pywraplp.Solver.CreateSolver('SCIP')
+﻿solver = pywraplp.Solver('ScheduleBuilder',pywraplp.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 infinity = solver.infinity()
 
 solver.EnableOutput()
@@ -101,23 +102,26 @@ if(DEBUG): print("Setting up constraints")
 for k in range(n): #k é numero de restriçoes
     constraint = solver.RowConstraint(1, 1, '')
     for i in range(n):
-        constraint.SetCoefficient(x[k*n + i], 1)
+        if(k != i):
+            constraint.SetCoefficient(x[k*n + i], 1)
 
 #garante que todas as variaveis Xij, com j fixo e i variando, somadas sejam igual a 1
 for k in range(n): #k é numero de restriçoes
     constraint = solver.RowConstraint(1, 1, '')
     for i in range(n):
-        constraint.SetCoefficient(x[i*n + k], 1)
+        if(k != i):
+            constraint.SetCoefficient(x[i*n + k], 1)
 
 for i in range(1,n):
     for j in range(1,n):
-        constraint = solver.RowConstraint(-infinity,n-2, '')
-        constraint.set_is_lazy(True)
-        constraint.SetCoefficient(x[i*n + j],(n-1))
-
         if(i != j):
-            constraint.SetCoefficient(u[i-1], 1)
-            constraint.SetCoefficient(u[j-1], -1)
+            constraint = solver.RowConstraint(-infinity,n-2, '')
+        #constraint.set_is_lazy(True)
+            constraint.SetCoefficient(x[i*n + j],(n-1))
+
+            if(i != j):
+                constraint.SetCoefficient(u[i-1], 1)
+                constraint.SetCoefficient(u[j-1], -1)
 
 
 print('Number of variables =', solver.NumVariables())
@@ -166,7 +170,7 @@ def heuristica():
             break
 
     return resposta, respostaVet, respostaU
-
+'''
 primal, resX, resU = heuristica()
 temp1 = []
 temp2 = []
@@ -178,8 +182,12 @@ for i in range(n-1):
     temp2.append(u[i])
 #primal, res = heuristica()
 solver.SetHint(temp2,temp1)
-tempoEmSegundos = 10 * 60
 
+'''
+
+#solver.SetIntegerParam(solver.SCIPsetSeparating,SCIP_PARAMSETTING_DEFAULT)
+
+tempoEmSegundos = 10 * 60
 solver.set_time_limit(tempoEmSegundos*1000)
 
 #solver.SCIP_LPPAR_TIMING
@@ -189,7 +197,7 @@ status = solver.Solve() # resolve
 
  
 
-if status == pywraplp.Solver.FEASIBLE: #se achou resposta
+if status == pywraplp.Solver.FEASIBLE or status == pywraplp.Solver.OPTIMAL: #se achou resposta
     #para cada variavel
     for j in range(n*n):
         indFrom = (int)(j/n)
