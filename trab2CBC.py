@@ -6,17 +6,39 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-t","--tempo", help="tempo Em Segundos(deve ser um numero inteiro)")
-parser.add_argument("-hr","--heuristica", help="Seleciona heuristica, 0-sem heuristica, 1-com heuristica de vizinho mais proximo")
-parser.add_argument("-se","--searchemphasis", help="Seleciona a enfase de busca. 0-default, 1-factibilidade, 2-otimalidade")
+parser.add_argument("-t","--tempo",type=int, help="tempo Em Segundos(deve ser um numero inteiro)")
+parser.add_argument("-hr","--heuristica",type=int, help="Seleciona heuristica, 0-sem heuristica, 1-com heuristica de vizinho mais proximo")
+parser.add_argument("-se","--searchemphasis",type=int, help="Seleciona a enfase de busca. 0-default, 1-factibilidade, 2-otimalidade")
+parser.add_argument("-of", help="Output Folder")
 
 args = parser.parse_args()
 
-print(args.t)
+
+m = Model()
+
+#default arguments
+m.emphasis = SearchEmphasis.DEFAULT # Default
+tempSec = -1# sem limite
+heuristica = 1
+
+if(args.tempo != None):
+    tempSec = args.tempo
+
+if(args.searchemphasis != None):
+    if(args.searchemphasis == 1): m.emphasis = SearchEmphasis.FEASIBILITY
+    elif(args.searchemphasis == 2): m.emphasis = SearchEmphasis.OPTIMALITY
+
+if(args.heuristica != None):
+    heuristica = args.heuristica
 
 
-#DEFAULT = 0, FEASIBILITY = 1, OPTIMALITY  = 2
-SearchEmphasis(1)
+
+print("Parametros de execução:")
+print("Tempo Limite: " + str(tempSec) )
+print("Enfase: " + str(m.emphasis) )
+print("Heuristica: " + str(heuristica) )
+print()
+
 
 def dist(x1,y1,x2,y2):
     return math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) )
@@ -74,7 +96,6 @@ for i in range(n):
     for j in range (n):
            data['obj_coeffs'].append(mat[i][j])
 
-m = Model()
 
 x = [ m.add_var(var_type=BINARY) for i in range(n*n) ]
 u = [ m.add_var(var_type=INTEGER, lb=1, ub=n-1) for i in range(n-1) ]
@@ -88,15 +109,14 @@ for i in range(n):
 for i in range(1,n):
     for j in range(1,n):
     	if(i != j):
-    		#m += u[i-1] - u[j-1] + (n-1)*x[i*n + j] <= n-2
-    		m.add_lazy_constr(u[i-1] - u[j-1] + (n-1)*x[i*n + j] <= n-2) #Se for ser lazy constraint
+    		m += u[i-1] - u[j-1] + (n-1)*x[i*n + j] <= n-2
 
 
 m.objective = xsum(data['obj_coeffs'][i]*x[i] for i in range(n*n))
 
 
 
-
+#heuristica do vizinho mais proximo
 def heuristica():
     resposta = 0
     respostaVet = [0] * (n*n)
@@ -131,24 +151,31 @@ def heuristica():
 
     return resposta, respostaVet, respostaU
 
+if(heuristica == 1):
+    primal, resX, resU = heuristica()
+    temp = []
+    for i in range(n*n):
+    	temp.append( (x[i], resX[i]) )
+    for i in range(n-1):
+    	temp.append( (u[i], resU[i]) )
 
-primal, resX, resU = heuristica()
-temp = []
-for i in range(n*n):
-	temp.append( (x[i], resX[i]) )
-for i in range(n-1):
-	temp.append( (u[i], resU[i]) )
-
-m.start = temp
-print(primal)
+    m.start = temp
+    print("Valor da heuristica inicial: " + str(primal) )
+    print()
 
 
+def OPT_2():
+    return
 
-tempSec = 30 * 60
+if(tempSec < 0):
+    status = m.optimize()
+else:
+    status = m.optimize(max_seconds=tempSec)
 
-status = m.optimize(max_seconds=tempSec)
 
 print("FIIIM")
+print(status)
+
 if status == OptimizationStatus.OPTIMAL:
     print('optimal solution cost {} found'.format(m.objective_value))
 elif status == OptimizationStatus.FEASIBLE:
@@ -163,7 +190,8 @@ if status == OptimizationStatus.OPTIMAL or status == OptimizationStatus.FEASIBLE
     	#print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[i].x)
     	if abs(x[i].x) > 1e-6:
     		plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
-    plt.show()
+    if(args.of != None):
+        plt.savefig(args.of)
     '''
     for v in m.vars:
        if abs(v.x) > 1e-6: # only printing non-zeros
