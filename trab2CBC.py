@@ -9,7 +9,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-t","--tempo",type=int, help="tempo Em Segundos(deve ser um numero inteiro)")
 parser.add_argument("-hr","--heuristica",type=int, help="Seleciona heuristica, 0-sem heuristica, 1-com heuristica de vizinho mais proximo")
 parser.add_argument("-se","--searchemphasis",type=int, help="Seleciona a enfase de busca. 0-default, 1-factibilidade, 2-otimalidade")
-parser.add_argument("-of", help="Output Folder")
+parser.add_argument("-of", help="Output picture")
+parser.add_argument("-ihr", help="File With input heuristic")
 
 args = parser.parse_args()
 
@@ -19,7 +20,7 @@ m = Model()
 #default arguments
 m.emphasis = SearchEmphasis.DEFAULT # Default
 tempSec = -1# sem limite
-heuristica = 1
+heuristicaBool = 1
 
 if(args.tempo != None):
     tempSec = args.tempo
@@ -29,14 +30,14 @@ if(args.searchemphasis != None):
     elif(args.searchemphasis == 2): m.emphasis = SearchEmphasis.OPTIMALITY
 
 if(args.heuristica != None):
-    heuristica = args.heuristica
+    heuristicaBool = args.heuristica
 
 
 
 print("Parametros de execução:")
 print("Tempo Limite: " + str(tempSec) )
 print("Enfase: " + str(m.emphasis) )
-print("Heuristica: " + str(heuristica) )
+print("Heuristica: " + str(heuristicaBool) )
 print()
 
 
@@ -117,16 +118,18 @@ m.objective = xsum(data['obj_coeffs'][i]*x[i] for i in range(n*n))
 
 
 #heuristica do vizinho mais proximo
-def heuristica():
+def heuristicaFunc():
     resposta = 0
     respostaVet = [0] * (n*n)
     respostaU = [0] * (n-1)
+    order = [0] * (n)
     visitados = [0] * n
     numVisitados = 1
 
     cnt = 0
     i = 0
     visitados[0] = 1
+    order[cnt] = 0
     while (True):
         minValue = 0x7fffffff
         idx = -1
@@ -139,6 +142,7 @@ def heuristica():
         #print(idx)
         cnt += 1
         respostaU[idx-1] = cnt
+        order[cnt] = idx
         respostaVet[i*n + idx] = 1
         visitados[idx] = 1
         numVisitados += 1
@@ -149,10 +153,116 @@ def heuristica():
             resposta += mat[i][0]
             break
 
-    return resposta, respostaVet, respostaU
+    return resposta, respostaVet, respostaU, order
 
-if(heuristica == 1):
-    primal, resX, resU = heuristica()
+
+def calc_value_sol(order):
+    res = 0
+    for i in range(n):
+        res += mat[order[i]][order[(i+1)%n]]
+    return res
+
+def swp2OPT(route,i,k):
+    newRoute = [0]*n
+    for j in range(i):
+        newRoute[j] = route[j]
+    for j in range(k,i-1,-1):
+        newRoute[k-j+i] = route[j]
+    for j in range(k+1,n):
+        newRoute[j] = route[j]
+    return newRoute
+
+def OPT_2(routeP):
+    route = routeP
+    resAtual = calc_value_sol(route)
+    achouNovo = 1
+
+    while(achouNovo == 1):
+        #print(resAtual)
+        achouNovo = 0
+        for i in range(1,n-1):
+            for j in range(i+1,n):
+                diff = 0
+                diff -= mat[route[i-1]][route[i]]
+                diff -= mat[route[j]][route[(j+1)%n]]
+                diff += mat[route[i-1]][route[j]]
+                diff += mat[route[i]][route[(j+1)%n]]
+                
+                if(diff < 0):
+                    newRoute = swp2OPT(route,i,j)
+                    route = newRoute
+                    resAtual = calc_value_sol(newRoute)
+                    achouNovo = 1
+                    break
+            if(achouNovo == 1):
+                break
+
+    return route, resAtual
+
+def criaResFromRoute(route):
+    resX = [0] * (n*n)
+    resU = [0] * (n-1)
+    posZero = -1
+    for i in range(n):
+        resX[route[i]*n + route[(i+1)%n]] = 1
+        if(route[i] == 0):
+            posZero = i
+
+    posZero = (posZero + 1) %n
+    for j in range(n-1):
+        resU[route[(posZero+j)%n]-1] = (j+1)
+
+    return resX,resU
+
+def criaRouteFromRes(resX):
+    tempRoute = [0]
+    i = 0
+    while (True):
+        for j in range(n):
+            if(abs(resX[i*n + j]) > 1e-6):
+                i = j
+                break
+        if(i == 0):
+            break
+        tempRoute.append(i)
+    return tempRoute
+
+def criaRouteFromResModel():
+    tempRoute = [0]
+    i = 0
+    while (True):
+        #print(i)
+        for j in range(n):
+            if(abs(x[i*n + j].x)  > 1e-6):
+                i = j
+                break
+        if(i == 0):
+            break
+        tempRoute.append(i)
+    return tempRoute
+
+def plot_route(route):
+    for i in range(n):
+        plt.plot([points[route[i]][0],points[route[(i+1)%n]][0]],[points[route[i]][1],points[route[(i+1)%n]][1]],'ro-')
+    plt.show()
+
+
+
+if(heuristicaBool == 1):
+    if(args.ihr != None):
+        f = open(args.ihr,'r')
+        newRoute = []
+        for i in range(n):
+            newRoute.append(f.readline())
+        resX,resU = criaResFromRoute(newRoute)
+        newPrimal = calc_value_sol(newRoute)
+
+    else:
+        primal, resX, resU, order = heuristicaFunc()#heurustuca vizinhança
+
+        newRoute, newPrimal = OPT_2(order)#melhora da heuristica
+        resX,resU = criaResFromRoute(newRoute)
+
     temp = []
     for i in range(n*n):
     	temp.append( (x[i], resX[i]) )
@@ -160,12 +270,10 @@ if(heuristica == 1):
     	temp.append( (u[i], resU[i]) )
 
     m.start = temp
-    print("Valor da heuristica inicial: " + str(primal) )
+    print("Valor da heuristica inicial: " + str(newPrimal) )
     print()
 
 
-def OPT_2():
-    return
 
 if(tempSec < 0):
     status = m.optimize()
@@ -176,29 +284,32 @@ else:
 print("FIIIM")
 print(status)
 
+resFinalX = []
 if status == OptimizationStatus.OPTIMAL:
     print('optimal solution cost {} found'.format(m.objective_value))
+    for i in range(n*n):
+        resFinalX.append(x[i].x)
 elif status == OptimizationStatus.FEASIBLE:
     print('sol.cost {} found, best possible: {}'.format(m.objective_value, m.objective_bound))
+    tempOrd = criaRouteFromResModel()
+    for i in range(n):
+        print(tempOrd[i])
+
+    print('Tentando melhorar solução com OPT-2')
+    newRoute, newPrimal = OPT_2(tempOrd)#melhora da heuristica
+    resFinalX,resFinalU = criaResFromRoute(newRoute)
+
+    print('sol.cost apos OPT-2 é: ' + str(newPrimal))
 elif status == OptimizationStatus.NO_SOLUTION_FOUND:
     print('no feasible solution found, lower bound is: {}'.format(m.objective_bound))
+
 if status == OptimizationStatus.OPTIMAL or status == OptimizationStatus.FEASIBLE:
     print('solution:')
     for i in range(n*n):
     	indFrom = (int)(i/n)
     	indTo = i%n
     	#print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[i].x)
-    	if abs(x[i].x) > 1e-6:
+    	if abs(resFinalX[i]) > 1e-6:
     		plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
     if(args.of != None):
         plt.savefig(args.of)
-    '''
-    for v in m.vars:
-       if abs(v.x) > 1e-6: # only printing non-zeros
-        #print('{} : {}'.format(v.name, v.x))
-        indFrom = (int)(v.x/n)
-        indTo = j%n
-       	plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
-    plt.show()
-    '''
-       
