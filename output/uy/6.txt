@@ -1,6 +1,6 @@
 Parametros de execução:
 Tempo Limite: 1800
-Enfase: SearchEmphasis.DEFAULT
+Enfase: SearchEmphasis.OPTIMALITY
 Heuristica: 1
 
 Welcome to the CBC MILP Solver 
@@ -72,36 +72,37 @@ Clp0000I Optimal - objective value 64767.609
 Clp0006I 0  Obj 64767.609
 Clp0000I Optimal - objective value 64767.609
 Clp0000I Optimal - objective value 64767.609
-Clp0032I Optimal objective 64767.60887 - 0 iterations time 98.782, Idiot 97.71
+Clp0032I Optimal objective 64767.60887 - 0 iterations time 98.752, Idiot 97.68
 
 Starting MIP optimization
 Cgl0004I processed model has 538024 rows, 538755 columns (538755 integer (538022 of which binary)) and 2685712 elements
-Coin3009W Conflict graph built in 3.421 seconds, density: 0.068%
+Coin3009W Conflict graph built in 3.237 seconds, density: 0.068%
 Cgl0015I Clique Strengthening extended 0 cliques, 0 were dominated
 Cbc0045I MIPStart provided solution with cost 84956.3
-Cbc0012I Integer solution of 84956.303 found by Reduced search after 0 iterations and 0 nodes (185.24 seconds)
+Cbc0012I Integer solution of 84956.303 found by Reduced search after 0 iterations and 0 nodes (177.89 seconds)
 Cbc0038I Full problem 538024 rows 538755 columns, reduced to 2389 rows 1678 columns
-Cbc0031I 690 added rows had average density of 40.289855
-Cbc0013I At root node, 690 cuts changed objective from 64767.609 to 64932.847 in 5 passes
-Cbc0014I Cut generator 0 (Probing) - 1696 row cuts average 2.0 elements, 0 column cuts (0 active)  in 580.249 seconds - new frequency is 1
-Cbc0014I Cut generator 1 (Gomory) - 49 row cuts average 721.1 elements, 0 column cuts (0 active)  in 5.170 seconds - new frequency is 1
-Cbc0014I Cut generator 2 (Knapsack) - 1 row cuts average 4.0 elements, 0 column cuts (0 active)  in 0.206 seconds - new frequency is -100
-Cbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.266 seconds - new frequency is -100
-Cbc0014I Cut generator 4 (OddWheel) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 1.422 seconds - new frequency is -100
-Cbc0014I Cut generator 5 (MixedIntegerRounding2) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.909 seconds - new frequency is -100
-Cbc0014I Cut generator 6 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 1.915 seconds - new frequency is -100
-Cbc0014I Cut generator 8 (ZeroHalf) - 536 row cuts average 2.0 elements, 0 column cuts (0 active)  in 898.008 seconds - new frequency is -100
+Cbc0031I 683 added rows had average density of 36.363104
+Cbc0013I At root node, 683 cuts changed objective from 64767.609 to 64932.847 in 6 passes
+Cbc0014I Cut generator 0 (Probing) - 1704 row cuts average 2.0 elements, 0 column cuts (0 active)  in 687.657 seconds - new frequency is 1
+Cbc0014I Cut generator 1 (Gomory) - 49 row cuts average 721.1 elements, 0 column cuts (0 active)  in 5.225 seconds - new frequency is 1
+Cbc0014I Cut generator 2 (GomoryL1) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100
+Cbc0014I Cut generator 3 (Knapsack) - 1 row cuts average 4.0 elements, 0 column cuts (0 active)  in 0.205 seconds - new frequency is -100
+Cbc0014I Cut generator 4 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.254 seconds - new frequency is -100
+Cbc0014I Cut generator 5 (OddWheel) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 1.407 seconds - new frequency is -100
+Cbc0014I Cut generator 6 (MixedIntegerRounding2) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.893 seconds - new frequency is -100
+Cbc0014I Cut generator 7 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 1.895 seconds - new frequency is -100
+Cbc0014I Cut generator 9 (TwoMirCutsL1) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.000 seconds - new frequency is -100
+Cbc0014I Cut generator 10 (ZeroHalf) - 536 row cuts average 2.0 elements, 0 column cuts (0 active)  in 890.564 seconds - new frequency is -100
 Cbc0020I Exiting on maximum time
-Cbc0005I Partial search - best objective 84956.303 (best possible 64932.847), took 954 iterations and 0 nodes (1808.81 seconds)
+Cbc0005I Partial search - best objective 84956.303 (best possible 64932.847), took 959 iterations and 0 nodes (1879.47 seconds)
 Cbc0035I Maximum depth 0, 0 variables fixed on reduced cost
-Total time (CPU seconds):       1782.23   (Wallclock seconds):       1811.78
-
+Total time (CPU seconds):       1870.95   (Wallclock seconds):       1882.35
 
 Valor da heuristica inicial: 84956.30287972471
 
 FIIIM
 OptimizationStatus.FEASIBLE
-sol.cost 84956.30287972468 found, best possible: 64932.84651650228
+sol.cost 84956.30287972468 found, best possible: 64932.84651650226
 0
 1
 6
