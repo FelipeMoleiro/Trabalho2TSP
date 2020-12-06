@@ -1,0 +1,5 @@
+Parametros de execução:
+Tempo Limite: 1800
+Enfase: SearchEmphasis.DEFAULT
+Heuristica: 1
+
