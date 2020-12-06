@@ -18,7 +18,7 @@ m = Model()
 #argumentos padrao do algoritmo
 m.emphasis = SearchEmphasis.DEFAULT # Default
 tempSec = -1# sem limite
-heuristicaBool = 1
+heuristicaBool = 0 # sem heuristica
 
 #modifica argumetnos padrap
 if(args.tempo != None):
