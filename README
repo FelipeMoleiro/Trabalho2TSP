@@ -1,22 +1,45 @@
-O solver utilizado foi o OR-TOOLS na linguagem python3
+O solver utilizado foi o Python-MIP, CBC na linguagem python3
 
 Para executar o código basta executar:
 
 python3 trab2.py
 
-O codigo vai esperar como entrada na primeira linha um valor n(numero de galaxias) e em seguida é esperada uma matriz de distancias de tamanho nxn com as respectivas distancias da galaxia i para j, com as linhas separadas por quebra de linha os elementos da linha separados por espaço, ex:
+O codigo vai esperar como entrada na primeira linha um valor n(numero de galaxias) e em seguida é esperada uma n linhas com o numero do ponto, e as coordenadas dele, ex:
 
 5
-0 215 390 655 915
-215 0 183 467 717
-390 183 0 315 592
-655 467 315 0 627
-915 717 592 627 0
+0 906 462
+1 699 495
+2 522 468
+3 294 252
+4 96 852
 
-Essa matriz pode ser escrita em um arquivo e redirecionada para o programa da seguinte forma no terminal:
+Essa entrada escrita em um arquivo e redirecionada para o programa da seguinte forma no terminal:
 
 python3 trab2.py < arquivoTeste
 
 Para executar o nosso toyproblem basta redirecionar o arquivo enviado junto com o codigo chamado 'toyproblem', ou seja, basta executar a seguinte linha:
 
-python3 trab2.py < toyproblem
+python3 trab2.py < testCases/toyproblem
+
+existem alguns argumentos que podem ser passados como parametro:
+
+-t num - tempo em segudos de execução
+-hr (0 ou 1) - se utilizara heuristica ou nao
+-se (0,1 ou 2)- enfase de busca, 0-default, 1-factibilidade, 2-otimalidade
+-of arquivo - Se encontrar uma solução ira salvar a imagem para um arquivo ao inves de mostrar na tela
+
+exemplo de uso:
+
+python3 trab2.py -t 1800 -hr 1 -se 2 -of imagem.png < testCases/toyproblem
+
+nesse exemplo ele ira executar com tempo maximo de 30 minutos(1800s), com heuristica(vizinhança e 2-OPT), enfase em otimalidade e salvar resultado como imagem.png.
+
+Se nenhum parametro for passado ele executara como padrao da seguinte maneira:
+-Tempo ilimitado
+-Sem heuristica
+-Enfase Padrao
+-Mostrar resultado na tela
+
+Todos os casos de teste utilizados estão na pasta testCases
+o script runAll.sh irá executar todos os casos de teste que foram feitos pelo grupo, porem sua execução é em torno de 6h devido ao grande numero de casos testados e o tempo limite de 30min cada um.
+Entretanto, todos os resultados ja estão na pasta output. Para ver os resultados melhor explicados, ver o pdf com analises.

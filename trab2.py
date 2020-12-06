@@ -10,7 +10,6 @@ parser.add_argument("-t","--tempo",type=int, help="tempo Em Segundos(deve ser um
 parser.add_argument("-hr","--heuristica",type=int, help="Seleciona heuristica, 0-sem heuristica, 1-com heuristica de vizinho mais proximo")
 parser.add_argument("-se","--searchemphasis",type=int, help="Seleciona a enfase de busca. 0-default, 1-factibilidade, 2-otimalidade")
 parser.add_argument("-of", help="Output picture")
-parser.add_argument("-ihr", help="File With input heuristic")
 
 args = parser.parse_args()
 
@@ -32,7 +31,7 @@ if(args.searchemphasis != None):
 if(args.heuristica != None):
     heuristicaBool = args.heuristica
 
-
+#m.cuts = 0
 
 print("Parametros de execução:")
 print("Tempo Limite: " + str(tempSec) )
@@ -251,19 +250,10 @@ def plot_route(route):
 
 
 if(heuristicaBool == 1):
-    if(args.ihr != None):
-        f = open(args.ihr,'r')
-        newRoute = []
-        for i in range(n):
-            newRoute.append(f.readline())
-        resX,resU = criaResFromRoute(newRoute)
-        newPrimal = calc_value_sol(newRoute)
+    primal, resX, resU, order = heuristicaFunc()#heurustuca vizinhança
 
-    else:
-        primal, resX, resU, order = heuristicaFunc()#heurustuca vizinhança
-
-        newRoute, newPrimal = OPT_2(order)#melhora da heuristica
-        resX,resU = criaResFromRoute(newRoute)
+    newRoute, newPrimal = OPT_2(order)#melhora da heuristica
+    resX,resU = criaResFromRoute(newRoute)
 
     temp = []
     for i in range(n*n):
@@ -294,8 +284,8 @@ if status == OptimizationStatus.OPTIMAL:
 elif status == OptimizationStatus.FEASIBLE:
     print('sol.cost {} found, best possible: {}'.format(m.objective_value, m.objective_bound))
     tempOrd = criaRouteFromResModel()
-    for i in range(n):
-        print(tempOrd[i])
+    #for i in range(n):
+    #    print(tempOrd[i])
 
     print('Tentando melhorar solução com OPT-2')
     newRoute, newPrimal = OPT_2(tempOrd)#melhora da heuristica
@@ -315,3 +305,5 @@ if status == OptimizationStatus.OPTIMAL or status == OptimizationStatus.FEASIBLE
     		plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
     if(args.of != None):
         plt.savefig(args.of)
+    else:
+        plt.show()
