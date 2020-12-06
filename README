@@ -1,5 +1,9 @@
 O solver utilizado foi o Python-MIP, CBC na linguagem python3
 
+para instalar dependencias basta executar
+
+pip3 install mip matplotlib argparse
+
 Para executar o código basta executar:
 
 python3 trab2.py

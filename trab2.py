@@ -1,10 +1,9 @@
 from mip import *
 import math
 import matplotlib.pyplot as plt
-import numpy as np
-import sys
 import argparse
 
+#Verifica argumentos de entrada
 parser = argparse.ArgumentParser()
 parser.add_argument("-t","--tempo",type=int, help="tempo Em Segundos(deve ser um numero inteiro)")
 parser.add_argument("-hr","--heuristica",type=int, help="Seleciona heuristica, 0-sem heuristica, 1-com heuristica de vizinho mais proximo")
@@ -13,14 +12,15 @@ parser.add_argument("-of", help="Output picture")
 
 args = parser.parse_args()
 
-
+#cria modelo
 m = Model()
 
-#default arguments
+#argumentos padrao do algoritmo
 m.emphasis = SearchEmphasis.DEFAULT # Default
 tempSec = -1# sem limite
 heuristicaBool = 1
 
+#modifica argumetnos padrap
 if(args.tempo != None):
     tempSec = args.tempo
 
@@ -31,8 +31,8 @@ if(args.searchemphasis != None):
 if(args.heuristica != None):
     heuristicaBool = args.heuristica
 
-#m.cuts = 0
 
+#informa args
 print("Parametros de execução:")
 print("Tempo Limite: " + str(tempSec) )
 print("Enfase: " + str(m.emphasis) )
@@ -43,11 +43,11 @@ print()
 def dist(x1,y1,x2,y2):
     return math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) )
 
+
 #le numero de galaxias
 n = int(input())
 
 data = {}
-
 points = []
 
 #se receber n == -1 gera pontos aleatorios
@@ -78,15 +78,6 @@ for i in range(n):
 
 #FIM DA LEITURA DA MATRIZ
 
-'''
-def subtour(N,edges,node):
-	queue = [node]
-	visited = [0] * n
-	while(queue):
-		atual = queue.pop()
-		for nxt in edges[atual]
-
-'''
 
 #coeficientes da func objetivo
 data['obj_coeffs'] = []
@@ -97,6 +88,7 @@ for i in range(n):
            data['obj_coeffs'].append(mat[i][j])
 
 
+#declara variaveis e restriçoes
 x = [ m.add_var(var_type=BINARY) for i in range(n*n) ]
 u = [ m.add_var(var_type=INTEGER, lb=1, ub=n-1) for i in range(n-1) ]
 
@@ -111,7 +103,7 @@ for i in range(1,n):
     	if(i != j):
     		m += u[i-1] - u[j-1] + (n-1)*x[i*n + j] <= n-2
 
-
+#declara func obj
 m.objective = xsum(data['obj_coeffs'][i]*x[i] for i in range(n*n))
 
 
@@ -154,13 +146,14 @@ def heuristicaFunc():
 
     return resposta, respostaVet, respostaU, order
 
-
+#retorna o valor de uma rota
 def calc_value_sol(order):
     res = 0
     for i in range(n):
         res += mat[order[i]][order[(i+1)%n]]
     return res
 
+#função swp do 2-OPT
 def swp2OPT(route,i,k):
     newRoute = [0]*n
     for j in range(i):
@@ -171,6 +164,7 @@ def swp2OPT(route,i,k):
         newRoute[j] = route[j]
     return newRoute
 
+#calcula heuristica 2-OPT a partir de uma rota base
 def OPT_2(routeP):
     route = routeP
     resAtual = calc_value_sol(route)
@@ -200,6 +194,7 @@ def OPT_2(routeP):
 
     return route, resAtual
 
+#retorna valor das variaveis do modelo a partir de uma rota
 def criaResFromRoute(route):
     resX = [0] * (n*n)
     resU = [0] * (n-1)
@@ -215,6 +210,7 @@ def criaResFromRoute(route):
 
     return resX,resU
 
+#retorna rota feita por uma certa resposta do modelo
 def criaRouteFromRes(resX):
     tempRoute = [0]
     i = 0
@@ -228,6 +224,7 @@ def criaRouteFromRes(resX):
         tempRoute.append(i)
     return tempRoute
 
+#retorna rota feita por uma certa resposta do modelo(desta vez verificando as proprias variaveis x e nao recebendo como parametro)
 def criaRouteFromResModel():
     tempRoute = [0]
     i = 0
@@ -242,13 +239,14 @@ def criaRouteFromResModel():
         tempRoute.append(i)
     return tempRoute
 
+#plot na tela da rota
 def plot_route(route):
     for i in range(n):
         plt.plot([points[route[i]][0],points[route[(i+1)%n]][0]],[points[route[i]][1],points[route[(i+1)%n]][1]],'ro-')
     plt.show()
 
 
-
+#se a heuristica esta ativada, calcula
 if(heuristicaBool == 1):
     primal, resX, resU, order = heuristicaFunc()#heurustuca vizinhança
 
@@ -266,7 +264,7 @@ if(heuristicaBool == 1):
     print()
 
 
-
+#se tem limite de tempo executa com limite
 if(tempSec < 0):
     status = m.optimize()
 else:
@@ -276,31 +274,33 @@ else:
 print("FIIIM")
 print(status)
 
+#print das soluçao final
 resFinalX = []
 if status == OptimizationStatus.OPTIMAL:
+
     print('optimal solution cost {} found'.format(m.objective_value))
     for i in range(n*n):
         resFinalX.append(x[i].x)
+
 elif status == OptimizationStatus.FEASIBLE:
+
     print('sol.cost {} found, best possible: {}'.format(m.objective_value, m.objective_bound))
     tempOrd = criaRouteFromResModel()
-    #for i in range(n):
-    #    print(tempOrd[i])
-
     print('Tentando melhorar solução com OPT-2')
     newRoute, newPrimal = OPT_2(tempOrd)#melhora da heuristica
     resFinalX,resFinalU = criaResFromRoute(newRoute)
-
     print('sol.cost apos OPT-2 é: ' + str(newPrimal))
+
 elif status == OptimizationStatus.NO_SOLUTION_FOUND:
+
     print('no feasible solution found, lower bound is: {}'.format(m.objective_bound))
 
 if status == OptimizationStatus.OPTIMAL or status == OptimizationStatus.FEASIBLE:
+
     print('solution:')
     for i in range(n*n):
     	indFrom = (int)(i/n)
     	indTo = i%n
-    	#print('X ' + str(indFrom) + ' ' +str(indTo)  , ' = ', x[i].x)
     	if abs(resFinalX[i]) > 1e-6:
     		plt.plot([points[indFrom][0],points[indTo][0]],[points[indFrom][1],points[indTo][1]],'ro-')
     if(args.of != None):
