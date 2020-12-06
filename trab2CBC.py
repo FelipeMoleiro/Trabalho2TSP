@@ -188,7 +188,9 @@ def OPT_2(routeP):
                 diff += mat[route[i-1]][route[j]]
                 diff += mat[route[i]][route[(j+1)%n]]
                 
-                if(diff < 0):
+                if(diff < -1e-6):
+                    #print(diff)
+                    #print(i,j)
                     newRoute = swp2OPT(route,i,j)
                     route = newRoute
                     resAtual = calc_value_sol(newRoute)
